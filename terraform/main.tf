@@ -124,10 +124,23 @@ resource "aws_instance" "webserver" {
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.vpc-ping.id, aws_security_group.allow-all-ssh.id, aws_security_group.vpc-web.id]
   associate_public_ip_address = true
-  #key_name                    = aws_key_pair.generated.key_name
+  key_name                    = aws_key_pair.generated.key_name
+
+  connection {
+    private_key = file("id_ed25519")
+    host        = self.public_ip
+  }
 
   tags = {
     name = "webserver"
+  }
+}
+
+resource "aws_key_pair" "generated" {
+  key_name = "webesrver_key"
+  public_key = file("id_ed25519.pub")
+  lifecycle {
+    ignore_changes = [key_name]
   }
 }
 
