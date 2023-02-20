@@ -18,14 +18,6 @@ resource "aws_vpc" "vpc" {
   }
 }
 
-resource "aws_subnet" "private_subnet" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = cidrsubnet(var.vpc_cidr, 8, 101)
-  tags = {
-    name = "private_subnet"
-  }
-}
-
 resource "aws_subnet" "public_subnet" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, 102)
@@ -33,6 +25,7 @@ resource "aws_subnet" "public_subnet" {
   tags = {
     name = "public_subnet"
   }
+  availability_zone = "us-west-2b"
 }
 
 resource "aws_route_table" "public_route_table" {
@@ -43,6 +36,24 @@ resource "aws_route_table" "public_route_table" {
   }
   tags = {
     name = "public_route_table"
+  }
+}
+
+resource "aws_subnet" "private_subnet_b" {
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = cidrsubnet(var.vpc_cidr, 8, 103)
+  availability_zone = "us-west-2b"
+  tags = {
+    name = "private_subnet_b"
+  }
+}
+
+resource "aws_subnet" "private_subnet_c" {
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = cidrsubnet(var.vpc_cidr, 8, 104)
+  availability_zone = "us-west-2c"
+  tags = {
+    name = "private_subnet_c"
   }
 }
 
@@ -63,10 +74,16 @@ resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public_subnet.id
 }
 
-resource "aws_route_table_association" "private" {
-  depends_on     = [aws_subnet.private_subnet]
+resource "aws_route_table_association" "private_b" {
+  depends_on     = [aws_subnet.private_subnet_b]
   route_table_id = aws_route_table.private_route_table.id
-  subnet_id      = aws_subnet.private_subnet.id
+  subnet_id      = aws_subnet.private_subnet_b.id
+}
+
+resource "aws_route_table_association" "private_c" {
+  depends_on     = [aws_subnet.private_subnet_c]
+  route_table_id = aws_route_table.private_route_table.id
+  subnet_id      = aws_subnet.private_subnet_c.id
 }
 
 resource "aws_internet_gateway" "internet_gateway" {
@@ -137,7 +154,7 @@ resource "aws_instance" "webserver" {
 }
 
 resource "aws_key_pair" "generated" {
-  key_name = "webesrver_key"
+  key_name   = "webesrver_key"
   public_key = file("id_ed25519.pub")
   lifecycle {
     ignore_changes = [key_name]
