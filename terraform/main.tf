@@ -139,7 +139,7 @@ resource "aws_instance" "webserver" {
   ami                         = data.aws_ami.amazon.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public_subnet.id
-  vpc_security_group_ids      = [aws_security_group.vpc-ping.id, aws_security_group.allow-all-ssh.id, aws_security_group.vpc-web.id]
+  vpc_security_group_ids      = [aws_security_group.vpc-ping.id, aws_security_group.allow-all-ssh.id, aws_security_group.vpc-web.id, "sg-0812730d8037341d9"]
   associate_public_ip_address = true
   key_name                    = aws_key_pair.generated.key_name
 

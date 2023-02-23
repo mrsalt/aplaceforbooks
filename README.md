@@ -12,5 +12,8 @@ See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-lamp-amazon-linux-2.
    `sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2`
 4. Now that your instance is current, you can install the Apache web server, MariaDB, and PHP software packages.
    Note: I'm going to divert here.  The original steps say to install apache and DB locally: `sudo yum install -y httpd mariadb-server`
-   I will install the DB on a different server.
+   a. I will install the DB on a different server, so I will only install apache locally:
    `sudo yum install -y httpd`
+   b. Create RDS instance in Amazon Console.
+   c. Connect RDS instance to EC2 instance.
+   I should probably have created the DB instance through terraform...
