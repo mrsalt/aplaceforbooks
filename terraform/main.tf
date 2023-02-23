@@ -28,6 +28,15 @@ resource "aws_subnet" "public_subnet" {
   availability_zone = "us-west-2b"
 }
 
+resource "aws_subnet" "subnet_2" {
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = cidrsubnet(var.vpc_cidr, 8, 103)
+  tags = {
+    name = "subnet_2"
+  }
+  availability_zone = "us-west-2c"
+}
+
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.vpc.id
   route {
@@ -62,63 +71,34 @@ resource "aws_eip" "nat_gateway_eip" {
   }
 }
 
-# resource "aws_subnet" "private_subnet_b" {
-#   vpc_id            = aws_vpc.vpc.id
-#   cidr_block        = cidrsubnet(var.vpc_cidr, 8, 103)
-#   availability_zone = "us-west-2b"
-#   tags = {
-#     name = "private_subnet_b"
-#   }
-# }
+resource "aws_db_subnet_group" "db_subnet_group" {
+  name       = "db_subnet_group"
+  subnet_ids = [aws_subnet.public_subnet.id, aws_subnet.subnet_2.id]
 
-# resource "aws_subnet" "private_subnet_c" {
-#   vpc_id            = aws_vpc.vpc.id
-#   cidr_block        = cidrsubnet(var.vpc_cidr, 8, 104)
-#   availability_zone = "us-west-2c"
-#   tags = {
-#     name = "private_subnet_c"
-#   }
-# }
+  tags = {
+    Name = "db_subnet_group"
+  }
+}
 
-# resource "aws_route_table" "private_route_table" {
-#   vpc_id = aws_vpc.vpc.id
-#   route {
-#     cidr_block     = "0.0.0.0/0"
-#     nat_gateway_id = aws_nat_gateway.nat_gateway.id
-#   }
-#   tags = {
-#     name = "private_route_table"
-#   }
-# }
-
-# resource "aws_route_table_association" "private_b" {
-#   depends_on     = [aws_subnet.private_subnet_b]
-#   route_table_id = aws_route_table.private_route_table.id
-#   subnet_id      = aws_subnet.private_subnet_b.id
-# }
-
-# resource "aws_route_table_association" "private_c" {
-#   depends_on     = [aws_subnet.private_subnet_c]
-#   route_table_id = aws_route_table.private_route_table.id
-#   subnet_id      = aws_subnet.private_subnet_c.id
-# }
-
-# resource "aws_nat_gateway" "nat_gateway" {
-#   depends_on    = [aws_subnet.public_subnet]
-#   allocation_id = aws_eip.nat_gateway_eip.id
-#   subnet_id     = aws_subnet.public_subnet.id
-#   tags = {
-#     name = "nat_gateway"
-#   }
-# }
-
-# data "aws_ami" "ubuntu" {
-#   most_recent = true
-#   filter {
-#     name   = "name"
-#     values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-#   }
-# }
+resource "aws_db_instance" "db" {
+  depends_on = [
+    aws_db_subnet_group.db_subnet_group
+  ]
+  allocated_storage    = 10
+  db_name              = "database_1"
+  engine               = "mysql"
+  engine_version       = "8.0.28"
+  instance_class       = "db.t3.micro"
+  username             = "admin"
+  password             = var.db_password
+  parameter_group_name = "default.mysql8.0"
+  publicly_accessible  = false
+  skip_final_snapshot  = true
+  db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
+  tags = {
+    name = "db"
+  }
+}
 
 data "aws_ami" "amazon" {
   most_recent = true
