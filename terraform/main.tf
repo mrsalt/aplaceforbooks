@@ -39,51 +39,10 @@ resource "aws_route_table" "public_route_table" {
   }
 }
 
-resource "aws_subnet" "private_subnet_b" {
-  vpc_id            = aws_vpc.vpc.id
-  cidr_block        = cidrsubnet(var.vpc_cidr, 8, 103)
-  availability_zone = "us-west-2b"
-  tags = {
-    name = "private_subnet_b"
-  }
-}
-
-resource "aws_subnet" "private_subnet_c" {
-  vpc_id            = aws_vpc.vpc.id
-  cidr_block        = cidrsubnet(var.vpc_cidr, 8, 104)
-  availability_zone = "us-west-2c"
-  tags = {
-    name = "private_subnet_c"
-  }
-}
-
-resource "aws_route_table" "private_route_table" {
-  vpc_id = aws_vpc.vpc.id
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gateway.id
-  }
-  tags = {
-    name = "private_route_table"
-  }
-}
-
 resource "aws_route_table_association" "public" {
   depends_on     = [aws_subnet.public_subnet]
   route_table_id = aws_route_table.public_route_table.id
   subnet_id      = aws_subnet.public_subnet.id
-}
-
-resource "aws_route_table_association" "private_b" {
-  depends_on     = [aws_subnet.private_subnet_b]
-  route_table_id = aws_route_table.private_route_table.id
-  subnet_id      = aws_subnet.private_subnet_b.id
-}
-
-resource "aws_route_table_association" "private_c" {
-  depends_on     = [aws_subnet.private_subnet_c]
-  route_table_id = aws_route_table.private_route_table.id
-  subnet_id      = aws_subnet.private_subnet_c.id
 }
 
 resource "aws_internet_gateway" "internet_gateway" {
@@ -103,14 +62,55 @@ resource "aws_eip" "nat_gateway_eip" {
   }
 }
 
-resource "aws_nat_gateway" "nat_gateway" {
-  depends_on    = [aws_subnet.public_subnet]
-  allocation_id = aws_eip.nat_gateway_eip.id
-  subnet_id     = aws_subnet.public_subnet.id
-  tags = {
-    name = "nat_gateway"
-  }
-}
+# resource "aws_subnet" "private_subnet_b" {
+#   vpc_id            = aws_vpc.vpc.id
+#   cidr_block        = cidrsubnet(var.vpc_cidr, 8, 103)
+#   availability_zone = "us-west-2b"
+#   tags = {
+#     name = "private_subnet_b"
+#   }
+# }
+
+# resource "aws_subnet" "private_subnet_c" {
+#   vpc_id            = aws_vpc.vpc.id
+#   cidr_block        = cidrsubnet(var.vpc_cidr, 8, 104)
+#   availability_zone = "us-west-2c"
+#   tags = {
+#     name = "private_subnet_c"
+#   }
+# }
+
+# resource "aws_route_table" "private_route_table" {
+#   vpc_id = aws_vpc.vpc.id
+#   route {
+#     cidr_block     = "0.0.0.0/0"
+#     nat_gateway_id = aws_nat_gateway.nat_gateway.id
+#   }
+#   tags = {
+#     name = "private_route_table"
+#   }
+# }
+
+# resource "aws_route_table_association" "private_b" {
+#   depends_on     = [aws_subnet.private_subnet_b]
+#   route_table_id = aws_route_table.private_route_table.id
+#   subnet_id      = aws_subnet.private_subnet_b.id
+# }
+
+# resource "aws_route_table_association" "private_c" {
+#   depends_on     = [aws_subnet.private_subnet_c]
+#   route_table_id = aws_route_table.private_route_table.id
+#   subnet_id      = aws_subnet.private_subnet_c.id
+# }
+
+# resource "aws_nat_gateway" "nat_gateway" {
+#   depends_on    = [aws_subnet.public_subnet]
+#   allocation_id = aws_eip.nat_gateway_eip.id
+#   subnet_id     = aws_subnet.public_subnet.id
+#   tags = {
+#     name = "nat_gateway"
+#   }
+# }
 
 # data "aws_ami" "ubuntu" {
 #   most_recent = true
