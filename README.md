@@ -82,9 +82,10 @@ IMPORTANT NOTES:
 `[ec2-user ~]$ rm /var/www/html/phpinfo.php`
 
 4. Test mysql
+   See https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_GettingStarted.CreatingConnecting.MySQL.html
 
-   Install mysql client
-   `sudo yum install mysql`
+   Install mariadb client (yes, use the mariadb client to connect to mysql DB)
+   `sudo yum install mariadb`
 
    Connect using mysql client
    `mysql -h <output from rds_hostname>`
