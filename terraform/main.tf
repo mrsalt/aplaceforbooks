@@ -134,7 +134,7 @@ resource "aws_instance" "webserver" {
   ami                         = data.aws_ami.amazon.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public_subnet.id
-  vpc_security_group_ids      = [aws_security_group.vpc-ping.id, aws_security_group.allow-all-ssh.id, aws_security_group.vpc-web.id, aws_security_group.ec2-rds.id]
+  vpc_security_group_ids      = [aws_security_group.vpc-ping.id, aws_security_group.allow-silverbrook-ssh.id, aws_security_group.vpc-web.id, aws_security_group.ec2-rds.id]
   associate_public_ip_address = true
   key_name                    = aws_key_pair.generated.key_name
 
@@ -165,6 +165,24 @@ resource "aws_security_group" "allow-all-ssh" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "allow-silverbrook-ssh" {
+  name        = "allow-silverbrook-ssh"
+  vpc_id      = aws_vpc.vpc.id
+  description = "SSH Access"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["96.19.0.0/16"]
   }
   egress {
     from_port   = 0
@@ -225,9 +243,14 @@ resource "aws_security_group" "ec2-rds" {
   vpc_id      = aws_vpc.vpc.id
   description = "Rule to allow connections to database-1 from any instances this security group is attached to"
   egress {
-    from_port = 3306
-    to_port   = 3306
-    protocol  = "tcp"
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
+    cidr_blocks     = []
+    description     = ""
+    prefix_list_ids = []
+    security_groups = []
+    self            = false
   }
 }
 
