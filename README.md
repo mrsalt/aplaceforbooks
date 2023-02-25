@@ -80,3 +80,11 @@ IMPORTANT NOTES:
 3. Delete the phpinfo.php file. Although this can be useful information, it should not be broadcast to the internet for security reasons.
 
 `[ec2-user ~]$ rm /var/www/html/phpinfo.php`
+
+4. Test mysql
+
+   Install mysql client
+   `sudo yum install mysql`
+
+   Connect using mysql client
+   `mysql -h <output from rds_hostname>`

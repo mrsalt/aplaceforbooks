@@ -98,17 +98,18 @@ resource "aws_db_instance" "db" {
   depends_on = [
     aws_db_subnet_group.db_subnet_group
   ]
-  allocated_storage    = 10
-  db_name              = "database_1"
-  engine               = "mysql"
-  engine_version       = "8.0.28"
-  instance_class       = "db.t3.micro"
-  username             = "admin"
-  password             = var.db_password
-  parameter_group_name = "default.mysql8.0"
-  publicly_accessible  = false
-  skip_final_snapshot  = true
-  db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
+  allocated_storage      = 10
+  db_name                = "database_1"
+  engine                 = "mysql"
+  engine_version         = "8.0.28"
+  instance_class         = "db.t3.micro"
+  username               = "admin"
+  password               = var.db_password
+  parameter_group_name   = "default.mysql8.0"
+  publicly_accessible    = false
+  skip_final_snapshot    = true
+  db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.name
+  vpc_security_group_ids = [aws_security_group.rds.id]
   tags = {
     name = "db"
   }
@@ -133,7 +134,7 @@ resource "aws_instance" "webserver" {
   ami                         = data.aws_ami.amazon.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public_subnet.id
-  vpc_security_group_ids      = [aws_security_group.vpc-ping.id, aws_security_group.allow-all-ssh.id, aws_security_group.vpc-web.id, "sg-0812730d8037341d9"]
+  vpc_security_group_ids      = [aws_security_group.vpc-ping.id, aws_security_group.allow-all-ssh.id, aws_security_group.vpc-web.id, aws_security_group.ec2-rds.id]
   associate_public_ip_address = true
   key_name                    = aws_key_pair.generated.key_name
 
@@ -216,5 +217,39 @@ resource "aws_security_group" "vpc-ping" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "ec2-rds" {
+  name        = "ec2-rds"
+  vpc_id      = aws_vpc.vpc.id
+  description = "Rule to allow connections to database-1 from any instances this security group is attached to"
+  egress {
+    from_port = 3306
+    to_port   = 3306
+    protocol  = "tcp"
+  }
+}
+
+resource "aws_security_group" "rds" {
+  name   = "mysql"
+  vpc_id = aws_vpc.vpc.id
+
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = [aws_subnet.public_subnet.cidr_block]
+  }
+
+  egress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "mysql"
   }
 }
