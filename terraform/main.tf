@@ -75,16 +75,6 @@ resource "aws_internet_gateway" "internet_gateway" {
   }
 }
 
-resource "aws_eip" "nat_gateway_eip" {
-  vpc = true
-  depends_on = [
-    aws_internet_gateway.internet_gateway
-  ]
-  tags = {
-    name = "nat_gateway_eip"
-  }
-}
-
 resource "aws_db_subnet_group" "db_subnet_group" {
   name       = "db_subnet_group"
   subnet_ids = [aws_subnet.public_subnet.id, aws_subnet.subnet_2.id]
